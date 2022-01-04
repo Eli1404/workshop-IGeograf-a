@@ -1,0 +1,170 @@
+---
+title: "dplyr"
+author: "Elizabeth Valles"
+date: "Enero 2022"
+output:
+  slidy_presentation:
+    footer: "Instituto de Geografía - Elizabeth Valles"
+---
+
+```{r setup, include=FALSE}
+#install.packages("tidyverse")
+rm (list = ls())
+library(tidyverse)
+# the following sets global options
+#knitr::opts_chunk$set(echo = TRUE, fig.align = "center", message = FALSE, warning = FALSE)
+```
+
+# Beneficios de R
+>- Información dinámica, revisar tareas, examenes, curación de datos, etc... 
+<center>
+![](/home/eli/Desktop/Neurobiologia/Platicas/R-dplyr_basico/Escuela-01.gif){width=200px}
+
+***
+dplyr es una libreria que sirve para curar datos 
+<center>
+![](/home/eli/Desktop/Neurobiologia/Platicas/R-dplyr_basico/dplyr.png){width=600px}
+
+# ¿Cómo deben de estar acomodada la información?
+>- R = Formato long
+<center>
+![](/home/eli/Desktop/Neurobiologia/Platicas/R-dplyr_basico/tidy-data.png){width=800px}
+
+# Datos Tidy
+<center>
+![](/home/eli/Desktop/Neurobiologia/Platicas/R-dplyr_basico/data-science.png){width=700px}
+
+# Workflow 
+<center>
+![](/home/eli/Desktop/Neurobiologia/Platicas/R-dplyr_basico/tidy_workflow.png){width=400px}
+ 
+
+# Transformación de datos con dplyr 
+>- `%>%` - es el operador de tubería, une un paso con el siguiente
+>- `rename` - renombrar columnas
+>- `gather` - unir varias columnas en una
+>- `spread` - separa una columna en varias
+>- `select` - seleccionar columnas  
+>- `filter` - seleccionar filas acorde a condiciones 
+>- `arrange` - ordena filas basadas en valores de columnas (alfabetico, númerico, etc) 
+>- `mutate` - convierte datos existentes en columnas en nuevos datos en su propia columna (sumas, restas, división, etc.) 
+>- `summarize` - análisis estadísticos
+>- `group_by` - análisis basado en una o varias variables
+
+# Lectura de datos sin curar
+```{r echo=TRUE}
+turismo <- read_excel("/home/eli/Desktop/Neurobiologia/Platicas/IGeografia/data/6_2.xlsx", sheet = "Vista08a", range = cell_rows(12:45)) 
+turismo
+```
+
+# Remover filas que no son de interés
+```{r echo=TRUE}
+turismo %>% 
+  filter(!row_number() == 1) # mantiene todas las filas que sean distinas a la 1a
+```
+
+# Remover columnas que no son de interés
+```{r echo=TRUE}
+turismo %>% 
+  filter(!row_number() == 1) %>% # mantiene todas las filas que sean distinas a 1
+  select(1, starts_with("Total")) %>% # selecciona la primera columna y todas las que inicien con Total
+  select(-31) # selecciona todas, con excepción de la columna 31
+```
+
+# Renombrar columnas
+```{r}
+turismo1 <- turismo %>% 
+  filter(!row_number() == 1) %>% # mantiene todas las filas que sean distinas a 1
+  select(1, starts_with("Total")) %>% # selecciona la primera columna y todas las que inicien con Total
+  select(-31) %>% # selecciona todas, con excepción de la columna 31
+  rename("Estado" = "...1") # renombra la columna ...1 
+```
+
+# ¿Los datos están en formato long?
+```{r echo=TRUE}
+turismo1
+```
+
+# ¿Qué tipos de variables tenemos?
+```{r echo=TRUE}
+glimpse(turismo1)
+```
+
+# Modificar tipo de variable
+```{r echo=TRUE}
+turismo %>% 
+  filter(!row_number() == 1) %>% # mantiene todas las filas que sean distinas a 1
+  select(1, starts_with("Total")) %>% # selecciona la primera columna y todas las que inicien con Total
+  select(-31) %>% # selecciona todas, con excepción de la columna 31
+  rename("Estado" = "...1") %>% # renombra la columna ...1 
+  mutate(Estado = as.factor(Estado)) # cambia el tipo de variable, de chr a fct
+```
+
+# Unir columnas
+```{r echo=TRUE}
+turismo %>% 
+  filter(!row_number() == 1) %>% # mantiene todas las filas que sean distinas a 1
+  select(1, starts_with("Total")) %>% # selecciona la primera columna y todas las que inicien con Total
+  select(-31) %>% # selecciona todas, con excepción de la columna 31
+  rename("Estado" = "...1") %>% # renombra la columna ...1 
+  mutate(Estado = as.factor(Estado)) %>%  # cambia a factor la variable indicada
+  gather(2:30, key = "Turistas por noche", value = "cuartos") # unir columnas   
+```
+
+# Separar columnas
+```{r echo=TRUE}
+t.separate <- turismo %>% 
+  filter(!row_number() == 1) %>% # mantiene todas las filas que sean distinas a 1
+  select(1, starts_with("Total")) %>% # selecciona la primera columna y todas las que inicien con Total
+  select(-31) %>% # selecciona todas, con excepción de la columna 31
+  rename("Estado" = "...1") %>% # renombra la columna ...1 
+  mutate(Estado = as.factor(Estado)) %>%  # cambia a factor la variable indicada
+  gather(2:30, key = "Turistas por noche", value = "cuartos") %>% # unir columnas
+  separate("Turistas por noche", into = c("borrar", "año")) %>% # separa una columna en dos
+  select(-borrar)
+t.separate
+```
+
+# Extender una columna en varias
+```{r echo=TRUE}
+t.spread <- t.separate  %>%
+  spread(año, cuartos)
+t.spread
+```
+
+# Operaciones estadísticas básicas
+```{r echo=TRUE}
+t.separate %>% 
+  group_by(Estado) %>%
+  summarise(mean = mean(cuartos), sd = sd(cuartos))
+```
+
+# Crear nuevas columnas 
+```{r echo=TRUE}
+t.spread %>%  
+  mutate(Cuartos.90s = rowSums(.[2:9])) %>% 
+  select(1,31)
+```
+
+# Reorganizar los datos - menor a mayor calificacion
+```{r echo=TRUE}
+t.separate %>%
+  arrange(desc(año))
+```
+
+# Filtrar valores
+```{r echo=TRUE}
+t.separate %>% 
+  filter(año <= 2000)
+```
+
+# Guardar los datos manipulados/curados
+>- Guardar archivos con readr  
+```{r echo=TRUE}
+t.separate %>%  
+  write_csv(.,"/home/eli/Desktop/Neurobiologia/Platicas/IGeografia/data/datos_curados.dplyr.csv")
+```
+
+
+# Actividad
+>- Por grupo seleccionar una pestaña de la base 6_2.xlsx y arreglarlos en formato tibble-long (una columna una variable).
