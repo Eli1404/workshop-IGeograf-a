@@ -1,0 +1,142 @@
+---
+title: "Gráficos en mapas"
+author: "Elizabeth Valles"
+date: "Enero 2022"
+output:
+  slidy_presentation:
+    footer: "Instituto de Geografía - Elizabeth Valles"
+---
+
+```{r setup, include=FALSE}
+setwd("/home/eli/Desktop/Neurobiologia/Platicas/IGeografia/")
+library(tidyverse)
+library(mxmaps)
+knitr::opts_chunk$set(warning = F, message = F)
+```
+
+# Paquetes en R - gráficos de México 
+>- https://www.diegovalle.net/mxmaps/
+>- https://rpubs.com/dvillasanao/Mapa_por_estado_de_Mexico
+
+# mxmaps
+>- Creado por Diego Valle-Jones
+>- Se puede utilizar para crear mapas de México tanto a nivel estatal y municipal 
+>- Se basa en el paquete choroplethr
+>- Incluye funciones para crear mapas interactivos usando el paquete de leaflet
+>- Mapear datos del INEGI usando su API con el paquete inegiR 
+>- Se pueden agregar funciones de ggplot 
+
+# Instalación
+```{r echo=TRUE}
+#if (!require("devtools")) {
+#install.packages("devtools")} # opción con devtools
+
+#devtools::install_github("diegovalle/mxmaps") # opción con devtools
+
+#remotes::install_github("diegovalle/mxmaps") # opción con remotes
+
+#library("mxmaps")
+```
+
+# Lectura de archivos
+```{r echo=TRUE}
+datos <- read_csv("/home/eli/Desktop/Neurobiologia/Platicas/IGeografia/data/datos_curados.dplyr.csv") 
+glimpse(datos)
+```
+
+# Lectura de archivo que contiene los códigos por estado y municipio
+```{r echo=TRUE}
+code_data.base <- read_csv("/home/eli/Desktop/Neurobiologia/Platicas/IGeografia/data/Catalogo Unico de Claves de Areas Geoestadisticas Estatales, Municipales y Localidades.csv") %>% 
+  select(2,3,4,6:8,10,11,16:19) %>% # seleccionar variables de intrés
+  distinct(state_name, .keep_all = TRUE) # filtra los valores únicos de state_name, manteniendo todas las variables 
+print(code_data.base)
+```
+
+# Unir las bases: datos y code_data.base
+```{r echo=TRUE}
+datos.code <- datos %>% 
+  rename_at(1,~"state_name") %>% 
+  mutate(state_name = recode(state_name, "Veracruz" = "Veracruz de Ignacio de la Llave",
+                             "Coahuila" = "Coahuila de Zaragoza",
+                              "Michoacán" = "Michoacán de Ocampo",
+                             "Estado de México" = "México")) %>% 
+  left_join(code_data.base) %>% # incluye todas las filas de x (datos)
+  write_csv(., "/home/eli/Desktop/Neurobiologia/Platicas/IGeografia/data/datos.code.csv") 
+print(datos.code)
+```
+
+# Filtrar año y modificar el nombre de las varibles al formato compatible con mxmaps
+```{r echo=TRUE}
+datos.code <- datos.code %>% 
+  filter(año == "2020") %>% 
+  rename("value" = "cuartos",
+         "region" = "state_code")
+```
+
+# A gráficar!
+```{r echo=TRUE}
+mxstate_choropleth(datos.code)
+```
+
+# Modificar color
+```{r echo=TRUE}
+mxstate_choropleth(datos.code,
+                   num_colors = 9)
+```
+
+# Agregar título 
+```{r echo=TRUE}
+mxstate_choropleth(datos.code,
+                   num_colors = 9,
+                   title = "Cuartos ocupados en el 2020")
+```
+
+# Agregar leyenda 
+```{r echo=TRUE}
+mxstate_choropleth(datos.code,
+                   num_colors = 9,
+                   title = "Cuartos ocupados en el 2020",
+                   legend = "No. de cuartos")
+```
+
+# Modificar colores 
+```{r}
+library(formattable)
+plotmx <- mxstate_choropleth(datos.code,
+                   num_colors = 9,
+                   title = "Cuartos ocupados en el 2020",
+                   legend = "No. de cuartos") +
+  scale_fill_hue(l=40, c=60) 
+plotmx
+```
+
+# Gráfico interactivo: plotly
+```{r}
+library(plotly)
+plotmx.plotly <- ggplotly(plotmx)
+plotmx.plotly
+
+```
+
+# Exportar un gráfico interactivo: plotly
+```{r}
+htmlwidgets::saveWidget(as_widget(plotmx.plotly), "plotmx.plotly.html")
+```
+
+# Gráfico interactivo: mxmaps
+```{r}
+library(scales)
+library(leaflet)
+pal <- colorNumeric("Blues", domain = datos.code$value) # crear vector de colors
+mxstate_leaflet(datos.code,
+                pal,
+                ~ pal(value),
+                ~ sprintf("State: %s<br/>Value: %s", #extraer información de la base para imprimir los nombres a presentar en el mapa
+                          state_name, comma(value))) %>%
+  addLegend(position = "bottomright", pal = pal, values = datos.code$value) %>% 
+  addProviderTiles("CartoDB.Positron")
+```
+
+# Actividad: mxmaps
+>- Por grupo seleccionar una base de datos
+>- Graficar espacialmente los datos

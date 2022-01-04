@@ -1,0 +1,317 @@
+---
+title: "Estadísticos en  gráficos"
+author: "Elizabeth  Valles"
+date: "Enero, 2022"
+output:
+  slidy_presentation:
+    footer: "Instituto de Geografía - Elizabeth Valles"
+---
+```{r setup, include=FALSE}
+# the following sets global options
+knitr::opts_chunk$set(echo = TRUE, fig.align = "center", message = FALSE, warning = FALSE)
+```
+
+# Antes de gráficar...
+
+# Datos tidy
+<center>
+  ![](/home/eli/Desktop/Neurobiologia/Platicas/GGplot/tidy-data.png){width=800px}
+
+# Datos a gráficar
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+library(tidyverse)
+#library(readr)
+datos <- read_csv("/home/eli/Desktop/Neurobiologia/Platicas/IGeografia/data/datos_curados.dplyr.csv")
+glimpse(datos)
+```
+
+# ¿Qué tipo de variables tenemos?
+>- discretas (cáracter, factor)
+>- continuas (integrales, dobles)...
+
+```{r}
+glimpse(datos)
+```
+
+# ¿Qué queremos visualizar?
+una, dos variables, más...
+
+# Seleccionar gráfico en GGplot
+>- geom_point: diagrama de dispersión
+>- geom_jitter: variación random a la localización de los puntos
+>- geom_boxplot: diagrama de caja y bigótes 
+>- geom_violin: gráfico de violín
+>- geom_histogram: histograma
+>- geom_line: gráfico de línea
+>- geom_bar: gráfica de barras
+
+<center>
+  ![](/home/eli/Desktop/Neurobiologia/Platicas/IGeografia/modulo2/plots.png){width=600px}
+  
+# Ahora si, vamos a gráficar con ggplot
+```{r, out.width="700px", out.height="400px"}
+ggplot(data = datos, mapping = aes(Estado, cuartos)) 
+```
+
+# Agregar gráfico
+>- geom_"gráfico"
+```{r, out.width="700px", out.height="400px"}
+ggplot(data = datos, mapping = aes(Estado, cuartos))  +
+  geom_boxplot()
+```
+
+# Modificar tamaño de letra
+```{r, out.width="700px", out.height="400px"}
+ggplot(data = datos, mapping = aes(Estado, cuartos))  +
+  geom_boxplot() +
+  theme(axis.text.x = element_text(size = 5)) 
+```
+
+# Agregar color 
+```{r, out.width="700px", out.height="400px"}
+ggplot(data = datos, mapping = aes(Estado, cuartos, fill = Estado))  +
+  geom_boxplot() +
+  theme(axis.text.x = element_text(size = 5))
+```
+
+# Modificar color
+```{r, out.width="700px", out.height="400px"}
+ggplot(data = datos, mapping = aes(Estado, cuartos, fill = Estado))  +
+  geom_boxplot() +
+  theme(axis.text.x = element_text(size = 5)) +
+  scale_fill_hue(l=40, c=60)
+```
+
+# Modificar color 2
+```{r, out.width="700px", out.height="400px"}
+ggplot(data = datos, mapping = aes(Estado, cuartos, fill = Estado))  +
+  geom_boxplot() +
+  theme(axis.text.x = element_text(size = 5)) +
+  scale_fill_grey(start = 0.1, end = 0.9)
+```
+
+# Agregar texto
+```{r, out.width="700px", out.height="400px"}
+ggplot(data = datos, mapping = aes(Estado, cuartos, fill = Estado))  +
+  geom_boxplot() +
+  theme(axis.text.x = element_text(size = 5)) +
+  scale_fill_hue(l=40, c=60) +
+  ggtitle("Número de cuartos ocupados por estado") 
+```
+
+# Orientación
+```{r, out.width="700px", out.height="500px"}
+ggplot(data = datos, mapping = aes(Estado, cuartos, fill = Estado))  +
+  geom_boxplot() +
+  theme(axis.text.x = element_text(size = 5)) +
+  scale_fill_hue(l=40, c=60) +
+  ggtitle("Número de cuartos ocupados por Estado") +
+  coord_flip()
+```
+
+# Remover guías
+```{r, out.width="700px", out.height="500px"}
+ggplot(data = datos, mapping = aes(Estado, cuartos, fill = Estado))  +
+  geom_boxplot() +
+  theme(axis.text.x = element_text(size = 5)) +
+  scale_fill_hue(l=40, c=60) +
+  ggtitle("Número de cuartos ocupados por Estado") +
+  coord_flip() +
+  guides(fill = F)
+```
+
+# Modificar el tamaño del texto de los  ejes 
+```{r, out.width="700px", out.height="500px"}
+ggplot(data = datos, mapping = aes(Estado, cuartos, fill = Estado))  +
+  geom_boxplot() +
+  theme(axis.text.x = element_text(size = 10), 
+        axis.text.y = element_text(size = 8)) +
+  scale_fill_hue(l=40, c=60) +
+  ggtitle("Número de cuartos ocupados por Estado") +
+  coord_flip() +
+  guides(fill = F)
+```
+
+# Pero, el número de cuartos no se aprecia por ser números extensos...
+
+# Modificar las escalas de visualización
+```{r, out.width="700px", out.height="500px"}
+library(scales)
+ggplot(data = datos, mapping = aes(Estado, cuartos, fill = Estado))  +
+  geom_boxplot() +
+  theme(axis.text.x = element_text(size = 10), 
+        axis.text.y = element_text(size = 8)) +
+  scale_fill_hue(l=40, c=60) +
+  ggtitle("Número de cuartos ocupados por Estado") +
+  coord_flip() +
+  guides(fill = F) +
+  scale_y_continuous(labels = unit_format(unit = "M", scale = 1e-6))
+```
+
+# Incrementar el número de breaks del eje de las x
+```{r, out.width="700px", out.height="500px"}
+ggplot(data = datos, mapping = aes(Estado, cuartos, fill = Estado))  +
+  geom_boxplot() +
+  theme(axis.text.x = element_text(size = 10), 
+        axis.text.y = element_text(size = 8)) +
+  scale_fill_hue(l=40, c=60) +
+  ggtitle("Número de cuartos ocupados por Estado") +
+  coord_flip() +
+  guides(fill = F) +
+  scale_y_continuous(labels = unit_format(unit = "M", scale = 1e-6), n.breaks = 10)
+```
+
+# Agregar estadísticos descriptivos con ggpubr
+```{r, out.width="700px", out.height="500px"}
+library(ggpubr)
+ggplot(data = datos, mapping = aes(Estado, cuartos, fill = Estado))  +
+  geom_boxplot() +
+  theme(axis.text.x = element_text(size = 10), 
+        axis.text.y = element_text(size = 8)) +
+  scale_fill_hue(l=40, c=60) +
+  ggtitle("Número de cuartos ocupados por Estado") +
+  coord_flip() +
+  guides(fill = F) +
+  scale_y_continuous(labels = unit_format(unit = "M", scale = 1e-6), n.breaks = 20) +
+  stat_summary(fun.y = mean, geom = "point")
+```
+
+# Agregar estadísticos inferencial paramétrica con ggpubr
+```{r, out.width="700px", out.height="500px"}
+ggplot(data = datos, mapping = aes(Estado, cuartos, fill = Estado))  +
+  geom_boxplot() +
+  theme(axis.text.x = element_text(size = 4), 
+        axis.text.y = element_text(size = 8)) +
+  scale_fill_hue(l=40, c=60) +
+  ggtitle("Número de cuartos ocupados por Estado") +
+  guides(fill = F) +
+  scale_y_continuous(labels = unit_format(unit = "M", scale = 1e-6), n.breaks = 20) +
+  stat_summary(fun.y = mean, geom = "point") +
+  stat_compare_means(method = "anova",
+                     label.x = "Morelos", label.y = 40000000) +
+  stat_compare_means(method = "t.test", label = "p.signif", ref.group = ".all.", 
+                     comparisons = list(c("Quintana Roo", "Nayarit")))
+```
+
+# Violin plot
+```{r, out.width="700px", out.height="500px"}
+datos %>% 
+  filter(Estado %in% c("Colima","Oaxaca","Tamaulipas", "Veracruz")) %>% 
+  ggplot(mapping = aes(Estado, cuartos, fill = Estado))  +
+  geom_violin() +
+  theme(axis.text = element_text(size = 8)) +
+  scale_fill_hue(l=40, c=60) +
+  ggtitle("Número de cuartos ocupados por Estado") +
+  guides(fill = F) +
+  scale_y_continuous(labels = unit_format(unit = "M", scale = 1e-6), n.breaks = 20) +
+  stat_summary(fun.y = mean, geom = "point") +
+  stat_compare_means(method = "anova",
+                     label.x = "Colima", label.y = 6000000) +
+  stat_compare_means(method = "t.test", label = "p.signif", ref.group = ".all.", 
+                     comparisons = list(c("Colima", "Oaxaca"), c("Colima","Tamaulipas"),
+                                        c("Colima", "Veracruz"), c("Oaxaca","Tamaulipas"),
+                                        c("Oaxaca", "Veracruz"), c("Tamaulipas","Veracruz")))
+```
+
+# Scatter plot
+```{r, out.width="700px", out.height="500px"}
+ggplot(data = datos, mapping = aes(Estado, cuartos, color = año))  +
+  geom_point() +
+  theme(axis.text = element_text(size = 8)) +
+  scale_fill_hue(l=40, c=60) +
+  ggtitle("Número de cuartos ocupados por Estado") +
+  coord_flip() +
+  guides(fill = F) +
+  scale_y_continuous(labels = unit_format(unit = "M", scale = 1e-6), n.breaks = 20) 
+```
+
+# Scatter plot - año as factor
+```{r, out.width="700px", out.height="500px"}
+ggplot(data = datos, mapping = aes(Estado, cuartos, color = factor(año)))  +
+  geom_point() +
+  theme(axis.text = element_text(size = 8)) +
+  scale_fill_hue(l=40, c=60) +
+  ggtitle("Número de cuartos ocupados por Estado") +
+  coord_flip() +
+  guides(fill = F) +
+  scale_y_continuous(labels = unit_format(unit = "M", scale = 1e-6), n.breaks = 20) 
+```
+
+# Strip chart
+```{r, out.width="700px", out.height="500px"}
+ggplot(data = datos, mapping = aes(Estado, cuartos, color = factor(año)))  +
+  geom_jitter(size = 0.2) +
+  theme(axis.text = element_text(size = 4)) +
+  scale_fill_hue(l=40, c=60) +
+  ggtitle("Número de cuartos ocupados por Estado") +
+  coord_flip() +
+  guides(fill = F) +
+  scale_y_continuous(labels = unit_format(unit = "M", scale = 1e-6), n.breaks = 20) 
+```
+
+# Bar plot
+```{r, out.width="700px", out.height="500px"}
+ggplot(data = datos, mapping = aes(Estado, cuartos, fill = factor(año))) +
+  geom_bar(stat = "identity") +
+  theme(axis.text = element_text(size = 8)) +
+  scale_fill_hue(l=40, c=60) +
+  ggtitle("Número de cuartos ocupados por Estado") +
+  coord_flip() +
+  scale_y_continuous(labels = unit_format(unit = "M", scale = 1e-6), n.breaks = 20) 
+```
+
+# Subplots
+```{r, out.width="800px", out.height="1000px"}
+datos %>% 
+  filter(año %in% c(2015,2016,2017,2018,2019,2020)) %>% 
+  ggplot(mapping = aes(Estado, cuartos, color = factor(Estado)))  +
+  geom_jitter(size = 0.3) +
+  theme(axis.text.x = element_text(size = 6), 
+        axis.text.y = element_text(size = 2)) +
+  scale_fill_hue(l=40, c=60) +
+  ggtitle("Número de cuartos ocupados por Estado") +
+  coord_flip() +
+  guides(fill = F) +
+  scale_y_continuous(labels = unit_format(unit = "M", scale = 1e-6), n.breaks = 10) +
+  facet_wrap(~año) +
+  guides(color = F)
+```
+
+# Gráficos con ggstatsplot
+```{r, out.width="700px", out.height="500px"}
+library(ggstatsplot)
+datos %>% 
+  filter(Estado %in% c("Colima","Oaxaca","Tamaulipas", "Veracruz")) %>% 
+  ggbetweenstats(x = Estado, y = cuartos,  
+                 method = "np", 
+                 p.adjust.method = "bonferroni", 
+                 title = "Cuartos por estado",
+                 xlab = "Estado", 
+                 ylab = "No. de cuartos")
+```
+
+# Exportar un gráfico ggplot-ggstatsplot
+```{r, out.width="700px", out.height="500px"}
+datos %>% 
+  filter(Estado %in% c("Colima","Oaxaca","Tamaulipas", "Veracruz")) %>% 
+  ggbetweenstats(x = Estado, y = cuartos,  
+                 method = "np", 
+                 p.adjust.method = "bonferroni", 
+                 title = "Cuartos por estado",
+                 xlab = "Estado", 
+                 ylab = "No. de cuartos",
+                 ggplot.component = list(ggplot2::scale_y_continuous(labels = unit_format(unit = "M", scale = 1e-6), n.breaks = 10)))
+ggsave("cuartos.violin.jpg", width = 10, height = 6)
+```
+
+# Corrplot 
+<center>
+![](/home/eli/Desktop/Neurobiologia/Platicas/IGeografia/modulo2/exp2.pieplot.answer.ggstatsplot.jpg){width=1000px}
+
+# Pieplot 
+<center>
+![](/home/eli/Desktop/Neurobiologia/Platicas/IGeografia/modulo2/exp2.pieplot.answer.jpg){width=1800px}
+
+# Actividad: aplicando las funciones de ggplot
+>- Por grupo visualizar datos de interés
+>- Nota: se puede utilizar la base que arreglaron durante la sesión de dplyr

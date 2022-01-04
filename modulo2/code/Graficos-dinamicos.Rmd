@@ -1,0 +1,156 @@
+---
+title: "Gráficos dinámicos"
+author: "Elizabeth  Valles"
+date: "Enero, 2022"
+output:
+  slidy_presentation:
+    footer: "Instituto de Geografía - Elizabeth Valles"
+---
+
+```{r setup, include=FALSE}
+# the following sets global options
+knitr::opts_chunk$set(echo = TRUE, fig.align = "center", message = FALSE, warning = FALSE)
+```
+
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(gganimate)
+library(gapminder)
+library(gifski)
+library(plotly)
+library(scales)
+library(ggpubr)
+library(ggstatsplot)
+datos.animate <- read_csv("/home/eli/Desktop/Neurobiologia/Platicas/IGeografia/data/datos.code.csv")
+glimpse(datos.animate)
+```
+
+# Gráfico con ggplot
+```{r, out.width="700px", out.height="500px"}
+plot.cuartos <- ggplot(data = datos.animate, mapping = aes(state_name, cuartos, 
+                                                           color = state_name, 
+                                                           size = año)) +
+  geom_point(aes(frame = año), alpha = 0.5) +
+  scale_fill_hue(l=40, c=60) +
+  ggtitle("Cuartos por Estado-Año") +
+  theme(axis.text = element_text(size = 8)) +
+  coord_flip() +
+  scale_y_continuous(labels = unit_format(unit = "M", scale = 1e-6))
+plot.cuartos
+```
+
+# Gráfico con ggplotly
+```{r, out.width="700px", out.height="500px"}
+ggplotly(plot.cuartos)
+```
+
+# Box plot
+```{r, out.width="700px", out.height="500px"}
+box.plot <- datos.animate %>% 
+  ggplot(mapping = aes(state_name, cuartos, fill = state_name))  +
+  geom_boxplot() +
+  coord_flip() +
+  theme(axis.text = element_text(size = 8)) +
+  scale_fill_hue(l=40, c=60) +
+  ggtitle("Número de cuartos ocupados por Estado") +
+  guides(fill = FALSE) +
+  scale_y_continuous(labels = unit_format(unit = "M", scale = 1e-6), n.breaks = 20) +
+  stat_summary(fun.y = mean, geom = "point")  
+box.plot
+```
+
+# Gráfico con ggplotly
+```{r, out.width="700px", out.height="500px"}
+ggplotly(box.plot)
+```
+
+# Violin plot con ggstatsplot
+```{r, out.width="700px", out.height="500px"}
+violin.ggstatsplot <- datos.animate %>%
+  filter(state_name %in% c("Colima","Oaxaca","Tamaulipas", "Veracruz")) %>% 
+  ggbetweenstats(x = state_name, y = cuartos, 
+                 method = "np", 
+                 p.adjust.method = "bonferroni", 
+                 title = "Cuartos por estado",
+                 xlab = "Estado", 
+                 ylab = "No. de cuartos",
+                 ggplot.component = list(ggplot2::scale_y_continuous(labels = unit_format(unit = "M", scale = 1e-6), n.breaks = 10)))
+violin.ggstatsplot
+```
+
+# Gráfico con ggplotly
+```{r, out.width="700px", out.height="500px"}
+ggplotly(violin.ggstatsplot)
+```
+
+# Gráfico con ggplot animate
+```{r, out.width="600px", out.height="400px"}
+ggplot(data = datos.animate, mapping = aes(state_name, cuartos, 
+                                           color = state_name,
+                                           size = año)) +
+  geom_point(alpha = 0.5) +
+  scale_fill_hue(l=40, c=60) +
+  ggtitle("Cuartos por Estado-Año") +
+  theme(axis.text = element_text(size = 8)) +
+  coord_flip() +
+  scale_y_continuous(labels = unit_format(unit = "M", scale = 1e-6)) +
+  transition_time(año) +
+  ease_aes('linear')
+```
+
+# Bar plot: transition_time
+```{r, out.width="700px", out.height="500px"}
+datos.animate %>% 
+  ggplot()  +
+  geom_col(aes(state_name, cuartos, fill = factor(año))) +
+  theme(axis.text = element_text(size = 8)) +
+  ggtitle("Número de cuartos ocupados por Estado") +
+  coord_flip() +
+  transition_time(año) +
+  scale_y_continuous(labels = unit_format(unit = "M", scale = 1e-6))
+```
+
+# Bar plot: title{frame_time}
+```{r, out.width="700px", out.height="500px"}
+datos.animate %>% 
+  ggplot()  +
+  geom_col(aes(state_name, cuartos, fill = factor(año))) +
+  theme(axis.text = element_text(size = 8)) +
+  ggtitle("Número de cuartos ocupados por Estado") +
+  scale_y_continuous(labels = unit_format(unit = "M", scale = 1e-6)) +
+  coord_flip() +
+  transition_time(año) +
+  labs(title = "año: {frame_time}")
+```
+
+# Line plot: transition_reveal
+```{r, out.width="700px", out.height="500px"}
+datos.animate %>% 
+  filter(state_name %in% c("Colima","Oaxaca","Tamaulipas", "Veracruz")) %>%
+  ggplot(aes(año, cuartos, color = state_name))  +
+  geom_point() +
+  geom_line() +
+  scale_y_continuous(labels = unit_format(unit = "M", scale = 1e-6)) +
+  theme(axis.text = element_text(size = 8)) +
+  ggtitle("Número de cuartos ocupados por año") +
+  transition_reveal(año)
+```
+
+# Line plot: view_follow
+```{r, out.width="700px", out.height="500px"}
+datos.animate %>% 
+  filter(state_name %in% c("Colima","Oaxaca","Tamaulipas", "Veracruz")) %>%
+  ggplot(aes(año, cuartos, color = state_name))  +
+  geom_point() +
+  geom_line() +
+  scale_y_continuous(labels = unit_format(unit = "M", scale = 1e-6)) +
+  theme(axis.text = element_text(size = 8)) +
+  ggtitle("Número de cuartos ocupados por año") +
+  transition_reveal(año) +
+  view_follow()
+```
+
+# Actividad: aplicando las funciones de plotly o gganimate
+>- Por grupo visualizar datos dinámicos de interés
+>- Nota: se puede utilizar la base que arreglaron durante la sesión de dplyr

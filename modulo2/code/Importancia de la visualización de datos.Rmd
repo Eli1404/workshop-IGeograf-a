@@ -1,0 +1,95 @@
+---
+title: "Importancia de la visualización de datos"
+author: "Elizabeth  Valles"
+date: "Enero, 2022"
+output:
+  slidy_presentation:
+    footer: "Instituto de Geografía - Elizabeth Valles"
+---
+```{r setup, include=FALSE}
+# the following sets global options
+knitr::opts_chunk$set(echo = TRUE, fig.align = "center", message = FALSE, warning = FALSE)
+```
+
+# Visualización 
+La visualización de datos no solo es importante para comunicar resultados, sino también, es una técnica poderosa para el análisis exploratorio de datos. Cada tipo de gráfico, tiene su propio propósito y se puede aprovechar de una manera poderosa (https://www.r-bloggers.com/2020/07/why-data-visualization-is-important/). 
+
+# Visualización 
+>- Es la unión entre estadística y diseño 
+>- Es una forma gráfica de análisis de datos
+>- Un buen diseño de visualización debe de ser comprensible y comunicar los resultados 
+
+# Tipos de visualización
+>- Exploratorios: exploran los datos para confirmar y analizar, son para audiencia especializada 
+>- Explicativos: informan y persuaden al lector
+
+# Librerías de visualización en R
+>- Rbase
+>- ggpubr
+>- plotly
+>- ggstatplot
+>- ggplot
+
+# ggoplot2
+>- Creado en el 2005 por Hadley Wickham
+>- Es uno de paquetes más elegantes y versátiles de tidyverse
+>- Basado en el sistema “The Grammar of Graphics” de Leland Wilkinson
+>- Compatible con plotly (gráficos dinámicos) 
+>- ggstatsplot es una extensión (estadística) 
+
+# The Grammar of Graphics
+>- Las reglas gramaticales de los gráficos en ocasiones son matemáticas y otras estéticas. 
+>- Las matemática proporcionan herramientas simbólicas para representar abstracciones. 
+>- La estética, en el sentido griego original, ofrece principios para relacionar los atributos sensoriales (color, forma, etc.) con las abstracciones.
+
+# Elementos gramaticales esenciales
+>- Datos: la base que será graficada
+>- Estética: las escalas en las que mapeamos nuestros datos (aes)
+>- Geometrías: los elementos visuales usados en nuestros datos (geom_"")
+
+# ¿Qué tipo de variables tenemos?
+>- Discretas (cáracter, factor)
+>- Continuas (integrales, dobles)...
+
+# Visualizar las características de las variables
+>- str (rbase)
+>- glimpse (dplyr)
+>- class(data$variable)
+>- is.numeric(data$variable)
+
+# Cambiar el tipo de variable con dyplyr
+>- mutate(variable = as.factor(variable))
+>- mutate_if(is.numeric, as.factor)
+>- mutate_at(1, as.factor)
+
+# Corroborar que nuestros datos estén arreglados en formato long 
+>- Una columna, una variable
+>- Una fila, una observación
+
+# Arreglo de datos con dplyr
+>- gather(variables, key = "key", value = "value")
+>- spread(key, value)
+
+# Nota
+>- En un flujo de trabajo de análisis de datos exploratorio típico, la visualización de datos y el modelado estadístico son dos fases diferentes: 
+>- Modelado estadístico 
+>- Visualización
+>- La visualización informa a la estadística y puede sugerir otros análisis
+>- La estadística informa a la visualización y puede sugerir otros gráficos 
+
+# ¿Opción compatible con ggplot2?
+
+# ggstatsplot
+>- Combina las fases de visualización y estadística
+>- Es una extensión de ggplot2
+>- Crear gráficos con detalles estadísticos, lo que hace que la exploración de datos sea más simple y rápida
+>- Ver: https://indrajeetpatil.github.io/ggstatsplot/
+
+# plotly 
+>- Gráficos interactivos
+>- Compatible con ggplot2 y ggstatsplot
+>- Ver: https://plotly.com/r/
+
+# Listo, a graficar!
+<center>
+  ![](/home/eli/Desktop/Neurobiologia/Platicas/IGeografia/modulo2/IMG-5387.GIF){width=300px}
